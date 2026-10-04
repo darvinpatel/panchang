@@ -1,24 +1,33 @@
-import { istIso, addIsoDays } from "./astro";
+import { dueDelivery } from "./clock";
 import { resolveCity } from "./cities";
 import { reminderFields } from "./messages";
 import { getDay } from "./panchang";
-import { listSubscribers } from "./subscribers";
+import { listSubscribers, rememberSend } from "./subscribers";
+import { isTimeZone } from "./timezones";
 import { sendWhatsApp, twilioConfigured } from "./whatsapp";
 
-export async function sendSlot(slot: "morning" | "evening", now = new Date()) {
-  const today = istIso(now);
-  const targetIso = slot === "evening" ? addIsoDays(today, 1) : today;
-  const subscribers = (await listSubscribers()).filter((item) => item.when === slot);
+const fallbackZone = "Asia/Kolkata";
+
+export async function sendDue(now = new Date()) {
+  const subscribers = await listSubscribers();
   if (!twilioConfigured()) {
-    return { targetIso, matched: subscribers.length, sent: 0, skipped: subscribers.length, errors: 0, reason: "Twilio is not configured." };
+    return { matched: 0, sent: 0, skipped: subscribers.length, errors: 0, reason: "Twilio is not configured." };
   }
 
+  let matched = 0;
   let sent = 0;
   let skipped = 0;
   let errors = 0;
   for (const subscriber of subscribers) {
+    const zone = subscriber.timezone && isTimeZone(subscriber.timezone) ? subscriber.timezone : fallbackZone;
+    const due = dueDelivery(now, zone, subscriber.when);
+    if (!due || subscriber.lastSent === due.key) {
+      skipped += 1;
+      continue;
+    }
+    matched += 1;
     const city = resolveCity(subscriber.cityId);
-    const day = getDay(city.id, targetIso);
+    const day = getDay(city.id, due.targetIso);
     if (!day) {
       skipped += 1;
       continue;
@@ -33,15 +42,17 @@ export async function sendSlot(slot: "morning" | "evening", now = new Date()) {
       language: subscriber.language,
     });
     if (!fields) {
+      await rememberSend(subscriber.phone, due.key);
       skipped += 1;
       continue;
     }
     try {
       await sendWhatsApp(subscriber.phone, fields);
+      await rememberSend(subscriber.phone, due.key);
       sent += 1;
     } catch {
       errors += 1;
     }
   }
-  return { targetIso, matched: subscribers.length, sent, skipped, errors };
+  return { matched, sent, skipped, errors };
 }

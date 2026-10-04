@@ -102,8 +102,9 @@ export function observancesFor(day: LunarDay): Observance[] {
     );
     if (specials.length > 0) {
       items.push(...specials.map(toObservance));
-    } else if (day.paksha === "shukla" && day.tithi >= 2 && day.tithi <= 7 && (day.monthIndex === 0 || day.monthIndex === 6)) {
-      items.push(navratri(day.monthIndex, day.tithi));
+    } else if (day.paksha === "shukla" && (day.monthIndex === 0 || day.monthIndex === 6)) {
+      const lastPlainNight = day.monthIndex === 0 ? 8 : 7;
+      if (day.tithi >= 2 && day.tithi <= lastPlainNight) items.push(navratri(day.monthIndex, day.tithi));
     }
   }
 

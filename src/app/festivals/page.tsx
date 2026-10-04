@@ -33,7 +33,7 @@ export default async function FestivalsPage({
       <p className="eyebrow">{city.name}</p>
       <h1>Festivals and fasts</h1>
       <p className="lede narrow">
-        The next hundred days, named by the tithi at sunrise. Navratri, Diwali, Uttarayan, ekadashi, and the monthly vrats are included.
+        The next hundred days, named by the tithi at sunrise. Open a day to see the story, what a Gujarati home does, what it eats, and what it skips.
       </p>
       <div className="filters" role="tablist" aria-label="Filter observances">
         {FILTERS.map((filter) => (

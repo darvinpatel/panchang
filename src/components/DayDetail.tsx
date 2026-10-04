@@ -27,7 +27,13 @@ export function DayDetail({ day, heading = "Today's panchang" }: { day: Panchang
         <div><dt>Vikram</dt><dd>{day.vikram}</dd></div>
         <div><dt>Gujarati samvat</dt><dd>{day.gujaratiSamvat}</dd></div>
       </dl>
-      <ObserveList items={day.observances} />
+      {day.observances.length > 0 ? (
+        <p className="quiet practice-note">
+          How a Gujarati home often keeps this day. Your family may do less, or do it differently.
+          <span className="gu" lang="gu">ગુજરાતના ઘરે આ દિવસ ઘણી વાર આમ રાખાય છે. તમારું કુટુંબ ઓછું કરે, કે જુદું કરે, તે ચાલે.</span>
+        </p>
+      ) : null}
+      <ObserveList items={day.observances} detail />
     </section>
   );
 }

@@ -1,5 +1,6 @@
 import type { PanchangDay } from "./panchang";
 import { wantedForMessage, type MessagePrefs } from "./observances";
+import { practiceFor } from "./practice";
 
 export type Language = "en" | "gu" | "both";
 
@@ -79,14 +80,30 @@ export function reminderFields(day: PanchangDay, prefs: MessageInput): WhatsAppF
     parts.push(
       items
         .map((item) => {
-          if (prefs.language === "gu") return item.nameGu;
-          if (prefs.language === "en") return item.name;
-          return `${item.name} (${item.nameGu})`;
+          const practice = practiceFor(item.id);
+          if (prefs.language === "gu") return practice ? `${item.nameGu}. ${practice.briefGu}` : item.nameGu;
+          if (prefs.language === "en") return practice ? `${item.name}. ${practice.briefEn}` : item.name;
+          const en = practice ? `${item.name}. ${practice.briefEn}` : item.name;
+          const gu = practice ? practice.briefGu : item.nameGu;
+          return `${en} (${gu})`;
         })
-        .join(", "),
+        .join(" "),
     );
   }
-  return { "1": heading, "2": parts.join(". ") };
+  const note = parts.join(" ");
+  const compactItems = items
+    .map((item) => {
+      const practice = practiceFor(item.id);
+      if (prefs.language === "gu") return practice ? `${item.nameGu}. ${practice.briefGu}` : item.nameGu;
+      return practice ? `${item.name}. ${practice.briefEn}` : item.name;
+    })
+    .join(" ");
+  const compact = [prefs.daily ? parts[0] : "", compactItems].filter(Boolean).join(" ");
+  return { "1": heading, "2": note.length <= 700 ? note : compact };
+}
+
+export function previewReminder(fields: WhatsAppFields): string {
+  return `This is your Patro reminder for ${fields["1"]}.\nThe note for today is ${fields["2"]}.`;
 }
 
 export function confirmationFields(name: string, cityName: string, cityNameGu: string, language: Language): WhatsAppFields {

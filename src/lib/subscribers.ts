@@ -16,6 +16,8 @@ export type Subscriber = {
   daily: boolean;
   when: "morning" | "evening";
   language: Language;
+  timezone?: string;
+  lastSent?: string;
   createdAt: string;
 };
 
@@ -141,7 +143,7 @@ export async function listSubscribers(): Promise<Subscriber[]> {
   return data.subscribers;
 }
 
-export async function saveSubscriber(input: Omit<Subscriber, "id" | "createdAt">): Promise<Subscriber> {
+export async function saveSubscriber(input: Omit<Subscriber, "id" | "createdAt" | "lastSent" | "timezone"> & { timezone: string }): Promise<Subscriber> {
   if (!storeConfigured()) {
     return enqueue(async () => {
       const subscribers = await readFileStore();
@@ -175,6 +177,23 @@ export async function saveSubscriber(input: Omit<Subscriber, "id" | "createdAt">
     };
     data.subscribers.push(created);
     return created;
+  });
+}
+
+export async function rememberSend(phone: string, key: string): Promise<void> {
+  if (!storeConfigured()) {
+    await enqueue(async () => {
+      const subscribers = await readFileStore();
+      const existing = subscribers.find((item) => item.phone === phone);
+      if (!existing) return;
+      existing.lastSent = key;
+      await writeFileStore(subscribers);
+    });
+    return;
+  }
+  await updateBlob((data) => {
+    const existing = data.subscribers.find((item) => item.phone === phone);
+    if (existing) existing.lastSent = key;
   });
 }
 

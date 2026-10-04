@@ -374,7 +374,11 @@ function applyEveningFestivals(days: PanchangDay[]): void {
     }
     if (day.sunsetTithiIndex === 29) {
       if (!day.adhik && day.monthIndex === 6) {
-        if (!day.observances.some((obs) => obs.id === "diwali")) day.observances.unshift(diwali());
+        if (!day.observances.some((obs) => obs.id === "diwali")) {
+          const kali = day.observances.findIndex((obs) => obs.id === "kali-chaudas");
+          if (kali >= 0) day.observances.splice(kali + 1, 0, diwali());
+          else day.observances.unshift(diwali());
+        }
       } else if (!day.observances.some((obs) => obs.id === "sarva-pitru" || obs.id.startsWith("amavasya"))) {
         day.observances.push(amavasyaFast(day.monthIndex, day.adhik));
       }

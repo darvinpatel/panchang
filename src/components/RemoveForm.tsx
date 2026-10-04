@@ -31,7 +31,8 @@ export function RemoveForm() {
     <form className="remove-form" onSubmit={onSubmit}>
       <label>
         WhatsApp number to remove
-        <input name="phone" type="tel" inputMode="tel" autoComplete="tel" required placeholder="98XXX XXXXX" />
+        <input name="phone" type="tel" inputMode="tel" autoComplete="tel" required placeholder="+61 412 345 678" />
+        <span className="field-hint">Use the same number you signed up with, including the country code.</span>
       </label>
       <button className="button button-quiet" type="submit">Remove number</button>
       {message ? <p className={error ? "form-error" : "form-ok"} role="status">{message}</p> : null}

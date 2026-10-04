@@ -1,7 +1,7 @@
 import { SignupForm } from "@/components/SignupForm";
 import { RemoveForm } from "@/components/RemoveForm";
 import { resolveCity } from "@/lib/cities";
-import { renderMessage } from "@/lib/messages";
+import { previewReminder, reminderFields } from "@/lib/messages";
 import { getRange, loadToday } from "@/lib/panchang";
 import { storeConfigured } from "@/lib/db";
 import { twilioConfigured } from "@/lib/whatsapp";
@@ -24,7 +24,10 @@ export default async function WhatsAppPage({ searchParams }: { searchParams: Pro
     language: "both" as const,
   };
   const nextNote = getRange(city.id, today.iso, 45)
-    .map((day) => ({ day, text: renderMessage(day, prefs) }))
+    .map((day) => {
+      const fields = reminderFields(day, prefs);
+      return { day, text: fields ? previewReminder(fields) : null };
+    })
     .find((item) => item.text);
   const ready = twilioConfigured();
 
@@ -33,8 +36,8 @@ export default async function WhatsAppPage({ searchParams }: { searchParams: Pro
       <p className="eyebrow">WhatsApp</p>
       <h1>Notes for the days that matter</h1>
       <p className="lede narrow">
-        Patro texts the sunrise panchang for {city.name}. Festivals and fasts go out only on the day they fall.
-        A daily note is optional.
+        Patro texts the sunrise panchang for {city.name}. The message arrives around 7:00 where you live, and the day inside it is still that Gujarat day.
+        The day page is where the story, the puja, the food, and what to skip are written out.
       </p>
       <div className="split align-start">
         <div className="phone">
@@ -46,8 +49,8 @@ export default async function WhatsAppPage({ searchParams }: { searchParams: Pro
       <section className="panel">
         <h2>How sending works</h2>
         <ol className="steps">
-          <li>You save a WhatsApp number and the Gujarat city whose sunrise should name the day.</li>
-          <li>Each morning at 7:00, or the evening before, Patro checks that city’s tithi.</li>
+          <li>You save a WhatsApp number, the Gujarat city whose sunrise names the day, and the timezone where you live.</li>
+          <li>Around 7:00 in that timezone, on the morning or the evening before, Patro checks that city’s tithi.</li>
           <li>You get a note only when the day matches what you asked for.</li>
         </ol>
         <p className={ready ? "form-ok" : "quiet"}>
@@ -58,7 +61,7 @@ export default async function WhatsAppPage({ searchParams }: { searchParams: Pro
           <ol className="steps">
             <li>Create a Twilio account and open the WhatsApp sandbox, or add a WhatsApp sender.</li>
             <li>In <code>.env.local</code>, set <code>TWILIO_ACCOUNT_SID</code>, <code>TWILIO_AUTH_TOKEN</code>, and <code>TWILIO_WHATSAPP_FROM</code>.</li>
-            <li>Set <code>CRON_SECRET</code>. Call <code>/api/reminders?slot=morning</code> and <code>slot=evening</code> with <code>Authorization: Bearer</code> that secret.</li>
+            <li>Set <code>CRON_SECRET</code>. Call <code>/api/reminders</code> with <code>Authorization: Bearer</code> that secret.</li>
           </ol>
           <p className="quiet">
             {storeConfigured()

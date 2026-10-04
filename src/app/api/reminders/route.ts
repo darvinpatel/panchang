@@ -1,4 +1,4 @@
-import { sendSlot } from "@/lib/reminders";
+import { sendDue } from "@/lib/reminders";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -13,7 +13,5 @@ export async function GET(request: Request) {
   if (!authorized(request)) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const slot = new URL(request.url).searchParams.get("slot") === "evening" ? "evening" : "morning";
-  const result = await sendSlot(slot);
-  return Response.json(result);
+  return Response.json(await sendDue());
 }

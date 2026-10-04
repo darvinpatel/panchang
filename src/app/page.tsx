@@ -2,7 +2,7 @@ import Link from "next/link";
 import { DayDetail } from "@/components/DayDetail";
 import { ObserveList } from "@/components/ObserveList";
 import { TithiDial } from "@/components/TithiDial";
-import { renderMessage } from "@/lib/messages";
+import { previewReminder, reminderFields } from "@/lib/messages";
 import { getRange, loadToday } from "@/lib/panchang";
 import { withQuery } from "@/lib/query";
 
@@ -21,7 +21,10 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ c
     language: "both" as const,
   };
   const nextNote = getRange(today.city.id, today.iso, 45)
-    .map((day) => ({ day, text: renderMessage(day, prefs) }))
+    .map((day) => {
+      const fields = reminderFields(day, prefs);
+      return { day, text: fields ? previewReminder(fields) : null };
+    })
     .find((item) => item.text);
 
   return (
@@ -87,8 +90,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ c
           <p className="eyebrow light">Reminders</p>
           <h2>The same note, on WhatsApp</h2>
           <p>
-            Choose festivals, ekadashi and other fasts, or a short panchang every morning.
-            Patro uses sunrise in {today.city.name}.
+            The day page tells the story, the puja, the food, and what to skip. WhatsApp sends the short version around 7:00 where you live.
+            The day itself follows sunrise in {today.city.name}.
           </p>
           <Link className="button" href={withQuery("/whatsapp", { city: today.city.id })}>Get reminders</Link>
         </div>

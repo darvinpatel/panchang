@@ -2,6 +2,7 @@ import { resolveCity } from "@/lib/cities";
 import { confirmationFields, type Language } from "@/lib/messages";
 import { normalizePhone } from "@/lib/phone";
 import { reserveSignup, saveSubscriber } from "@/lib/subscribers";
+import { isTimeZone } from "@/lib/timezones";
 import { sendWhatsApp, twilioConfigured } from "@/lib/whatsapp";
 
 export const runtime = "nodejs";
@@ -22,6 +23,7 @@ export async function POST(request: Request) {
   const phone = typeof body.phone === "string" ? normalizePhone(body.phone) : null;
   const city = resolveCity(typeof body.cityId === "string" ? body.cityId : undefined);
   const when = body.when === "evening" ? "evening" : "morning";
+  const timezone = typeof body.timezone === "string" ? body.timezone : "";
   const language: Language = body.language === "en" || body.language === "gu" ? body.language : "both";
   const festivals = body.festivals === true;
   const fasting = body.fasting === true;
@@ -32,7 +34,10 @@ export async function POST(request: Request) {
     return Response.json({ error: "Enter a name." }, { status: 400 });
   }
   if (!phone) {
-    return Response.json({ error: "Enter a mobile number, with the country code if it is not an Indian number." }, { status: 400 });
+    return Response.json({ error: "Start with + and the country code. A 10-digit number with no + is saved as India." }, { status: 400 });
+  }
+  if (!isTimeZone(timezone)) {
+    return Response.json({ error: "Choose the timezone where you live." }, { status: 400 });
   }
   if (!festivals && !fasting && !shraddha && !daily) {
     return Response.json({ error: "Choose at least one kind of note." }, { status: 400 });
@@ -47,6 +52,7 @@ export async function POST(request: Request) {
     shraddha,
     daily,
     when,
+    timezone,
     language,
   });
 
