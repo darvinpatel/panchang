@@ -66,9 +66,9 @@ export function SignupForm({ cityId }: { cityId: string }) {
         <label>
           WhatsApp number
           <input name="phone" type="tel" inputMode="tel" autoComplete="tel" placeholder="+61 412 345 678" required />
-          <span className="field-hint">Start with + and the country code. A 10-digit number with no + is saved as India.</span>
         </label>
       </div>
+      <p className="field-hint">Include the country code, such as +61 or +1. Ten digits with no + are read as an Indian number.</p>
       <label>
         Gujarat city for the day
         <select name="cityId" defaultValue={cityId}>
