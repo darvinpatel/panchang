@@ -57,12 +57,47 @@ export function renderMessage(day: PanchangDay, prefs: MessageInput): string | n
   return lines.join("\n");
 }
 
-export function confirmationMessage(name: string, cityName: string, cityNameGu: string, language: Language): string {
+export type WhatsAppFields = { "1": string; "2": string };
+
+export function reminderFields(day: PanchangDay, prefs: MessageInput): WhatsAppFields | null {
+  const items = day.observances.filter((item) => wantedForMessage(item, prefs));
+  if (!prefs.daily && items.length === 0) return null;
+
+  const heading =
+    prefs.language === "gu"
+      ? `${prefs.cityNameGu}, ${day.weekdayGu} ${day.pretty}`
+      : `${prefs.cityName}, ${day.weekdayEn} ${day.pretty}`;
+  const parts: string[] = [];
+  if (prefs.daily) {
+    parts.push(
+      prefs.language === "gu"
+        ? `સૂર્યોદય ${day.sunriseLabel}, નક્ષત્ર ${day.nakshatraGu}`
+        : `Sunrise ${day.sunriseLabel}, nakshatra ${day.nakshatraEn}`,
+    );
+  }
+  if (items.length) {
+    parts.push(
+      items
+        .map((item) => {
+          if (prefs.language === "gu") return item.nameGu;
+          if (prefs.language === "en") return item.name;
+          return `${item.name} (${item.nameGu})`;
+        })
+        .join(", "),
+    );
+  }
+  return { "1": heading, "2": parts.join(". ") };
+}
+
+export function confirmationFields(name: string, cityName: string, cityNameGu: string, language: Language): WhatsAppFields {
   if (language === "gu") {
-    return `નમસ્તે ${name}. પત્રો ${cityNameGu}ના તહેવાર અને વ્રત આ ચેટ પર મોકલશે.`;
+    return { "1": `${name}, ${cityNameGu}`, "2": `${cityNameGu}ના તહેવાર અને વ્રત આ ચેટ પર મોકલાશે` };
   }
   if (language === "en") {
-    return `Namaste ${name}. Patro will send ${cityName} festivals and vrats to this chat.`;
+    return { "1": `${name}, ${cityName}`, "2": `${cityName} festivals and vrats will come to this chat` };
   }
-  return `Namaste ${name}. Patro will send ${cityName} festivals and vrats to this chat.\nનમસ્તે. પત્રો ${cityNameGu}ના તહેવાર અને વ્રત મોકલશે.`;
+  return {
+    "1": `${name}, ${cityName}`,
+    "2": `${cityName} festivals and vrats will come to this chat. ${cityNameGu}ના તહેવાર અને વ્રત મોકલાશે`,
+  };
 }

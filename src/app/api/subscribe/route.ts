@@ -1,5 +1,5 @@
 import { resolveCity } from "@/lib/cities";
-import { confirmationMessage, type Language } from "@/lib/messages";
+import { confirmationFields, type Language } from "@/lib/messages";
 import { normalizePhone } from "@/lib/phone";
 import { reserveSignup, saveSubscriber } from "@/lib/subscribers";
 import { sendWhatsApp, twilioConfigured } from "@/lib/whatsapp";
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    await sendWhatsApp(phone, confirmationMessage(name, city.name, city.nameGu, language));
+    await sendWhatsApp(phone, confirmationFields(name, city.name, city.nameGu, language));
     return Response.json({ ok: true, whatsapp: "sent" });
   } catch (error) {
     const warning = error instanceof Error ? error.message.slice(0, 180) : "WhatsApp could not be sent.";

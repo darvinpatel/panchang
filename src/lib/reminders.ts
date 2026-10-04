@@ -1,6 +1,6 @@
 import { istIso, addIsoDays } from "./astro";
 import { resolveCity } from "./cities";
-import { renderMessage } from "./messages";
+import { reminderFields } from "./messages";
 import { getDay } from "./panchang";
 import { listSubscribers } from "./subscribers";
 import { sendWhatsApp, twilioConfigured } from "./whatsapp";
@@ -23,7 +23,7 @@ export async function sendSlot(slot: "morning" | "evening", now = new Date()) {
       skipped += 1;
       continue;
     }
-    const body = renderMessage(day, {
+    const fields = reminderFields(day, {
       cityName: city.name,
       cityNameGu: city.nameGu,
       festivals: subscriber.festivals,
@@ -32,12 +32,12 @@ export async function sendSlot(slot: "morning" | "evening", now = new Date()) {
       daily: subscriber.daily,
       language: subscriber.language,
     });
-    if (!body) {
+    if (!fields) {
       skipped += 1;
       continue;
     }
     try {
-      await sendWhatsApp(subscriber.phone, body);
+      await sendWhatsApp(subscriber.phone, fields);
       sent += 1;
     } catch {
       errors += 1;
