@@ -47,10 +47,8 @@ export function SignupForm({ cityId }: { cityId: string }) {
       }
       if (body.whatsapp === "sent") {
         setStatus({ state: "saved", message: "Saved. A confirmation is on its way to WhatsApp." });
-      } else if (body.warning) {
-        setStatus({ state: "saved", message: `Saved on this server. WhatsApp did not send: ${body.warning}` });
       } else {
-        setStatus({ state: "saved", message: "Saved on this server. Messages start once WhatsApp sending is connected." });
+        setStatus({ state: "saved", message: "Saved. If the confirmation does not arrive, send the form once more." });
       }
       form.reset();
     } catch {

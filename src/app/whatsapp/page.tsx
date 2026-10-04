@@ -3,8 +3,6 @@ import { RemoveForm } from "@/components/RemoveForm";
 import { resolveCity } from "@/lib/cities";
 import { previewReminder, reminderFields } from "@/lib/messages";
 import { getRange, loadToday } from "@/lib/panchang";
-import { storeConfigured } from "@/lib/db";
-import { twilioConfigured } from "@/lib/whatsapp";
 
 export const dynamic = "force-dynamic";
 
@@ -29,15 +27,13 @@ export default async function WhatsAppPage({ searchParams }: { searchParams: Pro
       return { day, text: fields ? previewReminder(fields) : null };
     })
     .find((item) => item.text);
-  const ready = twilioConfigured();
 
   return (
     <div className="wrap page">
       <p className="eyebrow">WhatsApp</p>
       <h1>Notes for the days that matter</h1>
       <p className="lede narrow">
-        Patro texts the sunrise panchang for {city.name}. The message arrives around 7:00 where you live, and the day inside it is still that Gujarat day.
-        The day page is where the story, the puja, the food, and what to skip are written out.
+        A short note for the festivals and fasts you choose, around 7:00 where you live. The day inside it follows sunrise in {city.name}.
       </p>
       <div className="split align-start">
         <div className="phone">
@@ -46,34 +42,10 @@ export default async function WhatsAppPage({ searchParams }: { searchParams: Pro
         </div>
         <SignupForm key={city.id} cityId={city.id} />
       </div>
-      <section className="panel">
-        <h2>How sending works</h2>
-        <ol className="steps">
-          <li>You save a WhatsApp number, the Gujarat city whose sunrise names the day, and the timezone where you live.</li>
-          <li>Around 7:00 in that timezone, on the morning or the evening before, Patro checks that city’s tithi.</li>
-          <li>You get a note only when the day matches what you asked for.</li>
-        </ol>
-        <p className={ready ? "form-ok" : "quiet"}>
-          {ready ? "WhatsApp sending is connected on this server." : "WhatsApp sending is not connected yet. Numbers are still saved."}
-        </p>
-        <details>
-          <summary>Connect Twilio</summary>
-          <ol className="steps">
-            <li>Create a Twilio account and open the WhatsApp sandbox, or add a WhatsApp sender.</li>
-            <li>In <code>.env.local</code>, set <code>TWILIO_ACCOUNT_SID</code>, <code>TWILIO_AUTH_TOKEN</code>, and <code>TWILIO_WHATSAPP_FROM</code>.</li>
-            <li>Set <code>CRON_SECRET</code>. Call <code>/api/reminders</code> with <code>Authorization: Bearer</code> that secret.</li>
-          </ol>
-          <p className="quiet">
-            {storeConfigured()
-              ? "Numbers are saved in private storage on this host, so the morning and evening jobs can still find them after a restart."
-              : "This server is still using a local file. Connect a Vercel Blob store so signups survive a hosted deploy."}
-          </p>
-        </details>
-      </section>
-      <section className="panel">
-        <h2>Stop messages</h2>
+      <details className="quiet-stop">
+        <summary>Stop these notes</summary>
         <RemoveForm />
-      </section>
+      </details>
     </div>
   );
 }

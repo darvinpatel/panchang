@@ -44,11 +44,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <main id="content">{children}</main>
         <footer className="site-footer">
           <div className="wrap">
-            <p>
-              Days follow the tithi at sunrise in the Gujarat city you choose, on the amanta calendar.
-              The zodiac is sidereal Lahiri. A very short tithi can move a fast by one day in some temple almanacs.
-            </p>
-            <p>Patro is an independent almanac. It is not affiliated with Drik Panchang.</p>
+            <p>The day follows sunrise in the Gujarat city you choose.</p>
+            <p>Patro is independent and is not affiliated with Drik Panchang.</p>
           </div>
         </footer>
       </body>

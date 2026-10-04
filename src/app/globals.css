@@ -435,12 +435,14 @@ legend { padding: 0 0.3rem; font-family: var(--font-display), Georgia, serif; }
 }
 .filters a[aria-current="page"] { background: var(--peacock); color: var(--silk); }
 
-.steps { margin: 0.4rem 0 0.8rem; padding-left: 1.2rem; }
-.steps li + li { margin-top: 0.35rem; }
-.panel { margin-top: 1.2rem; }
-.panel + .panel { margin-top: 1rem; }
-details summary { cursor: pointer; font-family: var(--font-display), Georgia, serif; }
-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.88em; }
+.quiet-stop { margin-top: 1.5rem; }
+.quiet-stop summary {
+  cursor: pointer;
+  width: fit-content;
+  color: var(--ink-soft);
+  font-family: var(--font-display), Georgia, serif;
+}
+.quiet-stop .remove-form { margin-top: 0.8rem; max-width: 28rem; }
 
 .site-footer {
   border-top: 1px solid var(--line);
