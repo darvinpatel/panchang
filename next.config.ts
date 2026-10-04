@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["twilio", "astronomy-engine"],
+  serverExternalPackages: ["twilio"],
 };
 
 export default nextConfig;
