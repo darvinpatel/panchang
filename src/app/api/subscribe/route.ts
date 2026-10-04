@@ -1,28 +1,14 @@
 import { resolveCity } from "@/lib/cities";
 import { confirmationMessage, type Language } from "@/lib/messages";
 import { normalizePhone } from "@/lib/phone";
-import { saveSubscriber } from "@/lib/subscribers";
+import { reserveSignup, saveSubscriber } from "@/lib/subscribers";
 import { sendWhatsApp, twilioConfigured } from "@/lib/whatsapp";
 
 export const runtime = "nodejs";
 
-const hits = new Map<string, number[]>();
-
-function limited(ip: string): boolean {
-  const now = Date.now();
-  const recent = (hits.get(ip) ?? []).filter((time) => now - time < 60 * 60 * 1000);
-  if (recent.length >= 8) {
-    hits.set(ip, recent);
-    return true;
-  }
-  recent.push(now);
-  hits.set(ip, recent);
-  return false;
-}
-
 export async function POST(request: Request) {
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
-  if (limited(ip)) {
+  if (!(await reserveSignup(ip))) {
     return Response.json({ error: "Too many signups from this connection. Try again in an hour." }, { status: 429 });
   }
 

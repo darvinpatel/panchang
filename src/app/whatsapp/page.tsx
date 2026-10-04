@@ -3,6 +3,7 @@ import { RemoveForm } from "@/components/RemoveForm";
 import { resolveCity } from "@/lib/cities";
 import { renderMessage } from "@/lib/messages";
 import { getRange, loadToday } from "@/lib/panchang";
+import { storeConfigured } from "@/lib/db";
 import { twilioConfigured } from "@/lib/whatsapp";
 
 export const dynamic = "force-dynamic";
@@ -60,7 +61,9 @@ export default async function WhatsAppPage({ searchParams }: { searchParams: Pro
             <li>Set <code>CRON_SECRET</code>. Call <code>/api/reminders?slot=morning</code> and <code>slot=evening</code> with <code>Authorization: Bearer</code> that secret.</li>
           </ol>
           <p className="quiet">
-            Signups are stored in <code>data/subscribers.json</code> on this machine. A hosted deploy needs a database so numbers survive restarts and more than one server.
+            {storeConfigured()
+              ? "Numbers are saved in private storage on this host, so the morning and evening jobs can still find them after a restart."
+              : "This server is still using a local file. Connect a Vercel Blob store so signups survive a hosted deploy."}
           </p>
         </details>
       </section>
