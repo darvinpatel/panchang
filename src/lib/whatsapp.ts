@@ -34,6 +34,6 @@ export async function sendWhatsApp(to: string, fields: WhatsAppFields): Promise<
   await client.messages.create({
     from,
     to: destination,
-    body: `This is your Patro reminder for ${field(fields["1"])}.\nThe note for today is ${field(fields["2"])}.`,
+    body: `This is your Patro reminder for ${field(fields["1"])}. The note for today is ${field(fields["2"])}. Open Patro for the full day.`,
   });
 }

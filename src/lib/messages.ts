@@ -103,7 +103,7 @@ export function reminderFields(day: PanchangDay, prefs: MessageInput): WhatsAppF
 }
 
 export function previewReminder(fields: WhatsAppFields): string {
-  return `This is your Patro reminder for ${fields["1"]}.\nThe note for today is ${fields["2"]}.`;
+  return `This is your Patro reminder for ${fields["1"]}. The note for today is ${fields["2"]}. Open Patro for the full day.`;
 }
 
 export function confirmationFields(name: string, cityName: string, cityNameGu: string, language: Language): WhatsAppFields {
