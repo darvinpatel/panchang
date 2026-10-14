@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Besley, Literata, Noto_Serif_Gujarati } from "next/font/google";
 import { Suspense } from "react";
+import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Toran } from "@/components/Toran";
 import "./globals.css";
@@ -52,6 +53,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <div className="wrap">
             <p>The day follows sunrise in the Gujarat city you choose.</p>
             <p>Patro is independent and is not affiliated with Drik Panchang.</p>
+            <p style={{ marginTop: "1.2rem", paddingTop: "1.2rem", borderTop: "1px solid var(--line)" }}>
+              Panchang is a personal project by Darvin Patel · Contact: <a href="mailto:contact@darvinpatel.com">contact@darvinpatel.com</a>
+              {" · "}
+              <Link href="/about">About</Link>
+              {" · "}
+              <Link href="/contact">Contact</Link>
+            </p>
           </div>
         </footer>
       </body>
