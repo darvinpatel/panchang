@@ -10,6 +10,8 @@ const LINKS = [
   { href: "/calendar", label: "Month" },
   { href: "/festivals", label: "Festivals" },
   { href: "/whatsapp", label: "WhatsApp" },
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
 ];
 
 export function Header() {

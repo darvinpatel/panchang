@@ -39,6 +39,7 @@ export default async function WhatsAppPage({ searchParams }: { searchParams: Pro
         <div className="phone">
           <p className="phone-bar">{nextNote ? `Next note · ${nextNote.day.pretty}` : "Next note"}</p>
           <pre>{nextNote?.text ?? "No festival or fast in the next month and a half. Turn on the daily panchang if you want a note anyway."}</pre>
+          <p className="phone-note">Example for festivals and fasts. Your boxes decide what is sent.</p>
         </div>
         <SignupForm key={city.id} cityId={city.id} />
       </div>

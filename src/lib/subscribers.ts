@@ -17,7 +17,10 @@ export type Subscriber = {
   when: "morning" | "evening";
   language: Language;
   timezone?: string;
+  consentAt?: string;
   lastSent?: string;
+  pendingKey?: string;
+  pendingSid?: string;
   createdAt: string;
 };
 
@@ -143,7 +146,7 @@ export async function listSubscribers(): Promise<Subscriber[]> {
   return data.subscribers;
 }
 
-export async function saveSubscriber(input: Omit<Subscriber, "id" | "createdAt" | "lastSent" | "timezone"> & { timezone: string }): Promise<Subscriber> {
+export async function saveSubscriber(input: Omit<Subscriber, "id" | "createdAt" | "lastSent" | "pendingKey" | "pendingSid" | "timezone"> & { timezone: string }): Promise<Subscriber> {
   if (!storeConfigured()) {
     return enqueue(async () => {
       const subscribers = await readFileStore();
@@ -177,6 +180,48 @@ export async function saveSubscriber(input: Omit<Subscriber, "id" | "createdAt" 
     };
     data.subscribers.push(created);
     return created;
+  });
+}
+
+export async function markPending(phone: string, key: string, sid: string): Promise<void> {
+  await patchSubscriber(phone, (existing) => {
+    existing.pendingKey = key;
+    existing.pendingSid = sid;
+  });
+}
+
+export async function confirmSend(phone: string, key: string): Promise<void> {
+  await patchSubscriber(phone, (existing) => {
+    existing.lastSent = key;
+    if (existing.pendingKey === key) {
+      existing.pendingKey = undefined;
+      existing.pendingSid = undefined;
+    }
+  });
+}
+
+export async function clearPending(phone: string, key: string): Promise<void> {
+  await patchSubscriber(phone, (existing) => {
+    if (existing.pendingKey !== key) return;
+    existing.pendingKey = undefined;
+    existing.pendingSid = undefined;
+  });
+}
+
+async function patchSubscriber(phone: string, change: (existing: Subscriber) => void): Promise<void> {
+  if (!storeConfigured()) {
+    await enqueue(async () => {
+      const subscribers = await readFileStore();
+      const existing = subscribers.find((item) => item.phone === phone);
+      if (!existing) return;
+      change(existing);
+      await writeFileStore(subscribers);
+    });
+    return;
+  }
+  await updateBlob((data) => {
+    const existing = data.subscribers.find((item) => item.phone === phone);
+    if (existing) change(existing);
   });
 }
 

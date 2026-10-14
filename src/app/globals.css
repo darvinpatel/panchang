@@ -352,6 +352,12 @@ a:hover { color: var(--peacock); }
   border-radius: 16px 16px 16px 6px;
   padding: 0.8rem 0.85rem;
 }
+.phone-note {
+  margin: 0.55rem 0.15rem 0;
+  color: var(--gold-bright);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
 
 .button {
   display: inline-flex;
@@ -392,11 +398,14 @@ a:hover { color: var(--peacock); }
   border-color: var(--peacock);
   box-shadow: 0 0 0 3px rgba(20, 52, 44, 0.12);
 }
-.check { display: flex !important; align-items: center; gap: 0.55rem; min-height: 1.7rem; }
+.check { display: flex !important; align-items: flex-start; gap: 0.55rem; }
+.check > span { display: grid; gap: 0.15rem; }
+.check .field-hint { margin: 0; }
 .signup .check input {
   width: 1rem;
   height: 1rem;
   min-height: 0;
+  margin-top: 0.2rem;
   padding: 0;
   border-radius: 4px;
   box-shadow: none;
@@ -478,17 +487,67 @@ legend { padding: 0; margin-bottom: 0.15rem; font-family: var(--font-display), G
 }
 .quiet-stop .remove-form { margin-top: 0.8rem; max-width: 28rem; }
 
+.about-points,
+.contact-list {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.6rem;
+}
+.about-points { grid-template-columns: repeat(3, 1fr); }
+.contact-list { grid-template-columns: 1fr 1fr; margin-bottom: 0; }
+.about-points section,
+.contact-list div {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 1.15rem 1.2rem 1.25rem;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset, 0 16px 40px rgba(20, 52, 44, 0.05);
+}
+.about-points h2 { font-size: 1.25rem; }
+.about-points p { margin: 0; }
+.contact-list dt {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.contact-list dd {
+  margin: 0.35rem 0 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.25rem;
+}
+.page-next { display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; margin-top: 1.4rem; }
+
 .site-footer {
   border-top: 1px solid var(--line);
   padding: 1.4rem 0 2rem;
   color: var(--ink-soft);
   font-size: 0.95rem;
 }
+.footer-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(12rem, 0.7fr);
+  gap: 1rem 2rem;
+  align-items: start;
+}
+.footer-bar strong {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 600;
+  color: var(--ink);
+}
+.footer-bar nav {
+  display: grid;
+  gap: 0.2rem;
+  justify-items: end;
+}
+.site-footer a { color: inherit; }
 
 :focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
 
 @media (max-width: 860px) {
-  .hero, .split, .signup-band, .field-row, .facts { grid-template-columns: 1fr; }
+  .hero, .split, .signup-band, .field-row, .facts, .about-points, .contact-list, .footer-bar { grid-template-columns: 1fr; }
+  .footer-bar nav { justify-items: start; }
   .header-bar { grid-template-columns: 1fr auto; }
   .brand { grid-column: 1; grid-row: 1; }
   .city-form { grid-column: 2; grid-row: 1; }
@@ -503,8 +562,8 @@ legend { padding: 0; margin-bottom: 0.15rem; font-family: var(--font-display), G
   h1 { font-size: 2rem; }
   .hero { padding: 1rem; border-radius: 20px; }
   .dial svg { width: min(220px, 72vw); }
-  .nav { justify-content: space-between; width: 100%; gap: 0.4rem; }
-  .nav a { padding: 0.65rem 0; font-size: 0.98rem; }
+  .nav { justify-content: space-between; width: 100%; gap: 0.15rem 0.2rem; }
+  .nav a { padding: 0.65rem 0; font-size: 0.92rem; }
   .city-form select { max-width: 11.5rem; }
   .month { min-width: 0; table-layout: fixed; border-spacing: 3px; }
   .month th { text-align: center; font-size: 0.72rem; padding: 0; }

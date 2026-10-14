@@ -2,9 +2,9 @@ import { dueDelivery } from "./clock";
 import { resolveCity } from "./cities";
 import { reminderFields } from "./messages";
 import { getDay } from "./panchang";
-import { listSubscribers, rememberSend } from "./subscribers";
+import { clearPending, confirmSend, listSubscribers, markPending, rememberSend } from "./subscribers";
 import { isTimeZone } from "./timezones";
-import { sendWhatsApp, twilioConfigured } from "./whatsapp";
+import { messageStatus, sendWhatsApp, twilioConfigured } from "./whatsapp";
 
 const fallbackZone = "Asia/Kolkata";
 
@@ -21,7 +21,25 @@ export async function sendDue(now = new Date()) {
   for (const subscriber of subscribers) {
     const zone = subscriber.timezone && isTimeZone(subscriber.timezone) ? subscriber.timezone : fallbackZone;
     const due = dueDelivery(now, zone, subscriber.when);
-    if (!due || subscriber.lastSent === due.key) {
+    if (!due) {
+      skipped += 1;
+      continue;
+    }
+    if (subscriber.pendingKey === due.key && subscriber.pendingSid) {
+      const status = await messageStatus(subscriber.pendingSid).catch(() => "unknown");
+      if (status === "delivered" || status === "read") {
+        await confirmSend(subscriber.phone, due.key);
+        skipped += 1;
+        continue;
+      }
+      if (status === "failed" || status === "undelivered") {
+        await clearPending(subscriber.phone, due.key);
+      } else {
+        skipped += 1;
+        continue;
+      }
+    }
+    if (subscriber.lastSent === due.key) {
       skipped += 1;
       continue;
     }
@@ -47,8 +65,8 @@ export async function sendDue(now = new Date()) {
       continue;
     }
     try {
-      await sendWhatsApp(subscriber.phone, fields);
-      await rememberSend(subscriber.phone, due.key);
+      const delivery = await sendWhatsApp(subscriber.phone, fields);
+      await markPending(subscriber.phone, due.key, delivery.sid);
       sent += 1;
     } catch {
       errors += 1;

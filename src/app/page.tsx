@@ -85,6 +85,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ c
         <div className="phone">
           <p className="phone-bar">{nextNote ? `Next note · ${nextNote.day.pretty}` : "WhatsApp"}</p>
           <pre>{nextNote?.text ?? "No festival or fast in the next month and a half. A daily panchang note is still available."}</pre>
+          <p className="phone-note">Example for festivals and fasts. Your boxes decide what is sent.</p>
         </div>
         <div>
           <p className="eyebrow light">Reminders</p>

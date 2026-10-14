@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
 import { CITIES } from "@/lib/cities";
 import { COMMON_TIME_ZONES, TIME_ZONES, timeZonePlace, timeZoneRegion } from "@/lib/timezones";
@@ -37,20 +38,30 @@ export function SignupForm({ cityId }: { cityId: string }) {
           when: data.get("when"),
           timezone,
           language: data.get("language"),
+          consent: data.get("consent") === "on",
           company: data.get("company"),
         }),
       });
-      const body = (await response.json()) as { error?: string; warning?: string; whatsapp?: string };
+      const body = (await response.json()) as {
+        error?: string;
+        whatsapp?: string;
+        choices?: string[];
+        when?: string;
+        next?: string | null;
+      };
       if (!response.ok) {
         setStatus({ state: "error", message: body.error ?? "The number could not be saved." });
         return;
       }
-      if (body.whatsapp === "sent") {
-        setStatus({ state: "saved", message: "Saved. A confirmation is on its way to WhatsApp." });
-      } else {
-        setStatus({ state: "saved", message: "Saved. If the confirmation does not arrive, send the form once more." });
-      }
-      form.reset();
+      const choices = body.choices?.length ? body.choices.join(", ") : "the notes you chose";
+      const timing = body.when === "evening" ? "the evening before, around 7:00 your time" : "around 7:00 your time";
+      const next = body.next
+        ? `The next note is for ${body.next}, ${timing}.`
+        : "Nothing in the next month and a half matches these boxes.";
+      const delivery = body.whatsapp === "queued"
+        ? "A confirmation arrives only if WhatsApp can reach this number."
+        : "The confirmation did not go out. The notes are still saved.";
+      setStatus({ state: "saved", message: `Saved for ${choices}. ${next} ${delivery}` });
     } catch {
       setStatus({ state: "error", message: "The number could not be saved. Check the connection and try again." });
     }
@@ -99,10 +110,22 @@ export function SignupForm({ cityId }: { cityId: string }) {
       </label>
       <fieldset>
         <legend>Send a note for</legend>
-        <label className="check"><input type="checkbox" name="festivals" defaultChecked /> Festivals</label>
-        <label className="check"><input type="checkbox" name="fasting" defaultChecked /> Fasts and ekadashi</label>
-        <label className="check"><input type="checkbox" name="shraddha" /> Shraddha in pitru paksha</label>
-        <label className="check"><input type="checkbox" name="daily" /> A panchang note every day</label>
+        <label className="check">
+          <input type="checkbox" name="festivals" defaultChecked />
+          <span>Festivals<span className="field-hint">Navratri, Diwali, Uttarayan, and the other celebration days.</span></span>
+        </label>
+        <label className="check">
+          <input type="checkbox" name="fasting" defaultChecked />
+          <span>Fasts and ekadashi<span className="field-hint">Ekadashi, Pradosh, Sankashti, Shivaratri, and the plain full-moon and no-moon days.</span></span>
+        </label>
+        <label className="check">
+          <input type="checkbox" name="shraddha" />
+          <span>Shraddha in pitru paksha<span className="field-hint">The ancestor fortnight in Bhadarvo, about fifteen notes in a row.</span></span>
+        </label>
+        <label className="check">
+          <input type="checkbox" name="daily" />
+          <span>A panchang note every day<span className="field-hint">Sunrise and the nakshatra, even when nothing else is on.</span></span>
+        </label>
       </fieldset>
       <fieldset>
         <legend>When</legend>
@@ -115,6 +138,10 @@ export function SignupForm({ cityId }: { cityId: string }) {
         <label className="check"><input type="radio" name="language" value="gu" /> Gujarati</label>
         <label className="check"><input type="radio" name="language" value="en" /> English</label>
       </fieldset>
+      <label className="check">
+        <input type="checkbox" name="consent" required />
+        <span>Send these notes to my WhatsApp. The number is used only for that, and I can remove it. <Link href="/privacy">Privacy</Link></span>
+      </label>
       <input className="hp" name="company" tabIndex={-1} autoComplete="off" aria-hidden="true" />
       <button className="button" type="submit" disabled={status.state === "saving"}>
         {status.state === "saving" ? "Saving…" : "Send me these notes"}

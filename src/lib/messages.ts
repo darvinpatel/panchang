@@ -1,5 +1,7 @@
-import type { PanchangDay } from "./panchang";
+import { addIsoDays } from "./astro";
+import { zonedClock } from "./clock";
 import { wantedForMessage, type MessagePrefs } from "./observances";
+import { getDay, type PanchangDay } from "./panchang";
 import { practiceFor } from "./practice";
 
 export type Language = "en" | "gu" | "both";
@@ -104,6 +106,30 @@ export function reminderFields(day: PanchangDay, prefs: MessageInput): WhatsAppF
 
 export function previewReminder(fields: WhatsAppFields): string {
   return `This is your Patro reminder for ${fields["1"]}. The note for today is ${fields["2"]}. Open Patro for the full day.`;
+}
+
+/** The next Gujarat day that would produce a note, and the local day it is sent. */
+export function nextReminderDay(
+  now: Date,
+  timeZone: string,
+  when: "morning" | "evening",
+  cityId: string,
+  prefs: MessageInput,
+): PanchangDay | null {
+  const local = zonedClock(now, timeZone);
+  const windowEnd = (when === "evening" ? 21 : 9) * 60;
+  let sendIso = local.minutes >= windowEnd ? addIsoDays(local.iso, 1) : local.iso;
+  for (let step = 0; step < 50; step += 1) {
+    const targetIso = when === "evening" ? addIsoDays(sendIso, 1) : sendIso;
+    try {
+      const day = getDay(cityId, targetIso);
+      if (day && reminderFields(day, prefs)) return day;
+    } catch {
+      return null;
+    }
+    sendIso = addIsoDays(sendIso, 1);
+  }
+  return null;
 }
 
 export function confirmationFields(name: string, cityName: string, cityNameGu: string, language: Language): WhatsAppFields {

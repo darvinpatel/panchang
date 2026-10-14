@@ -1,5 +1,5 @@
 import { resolveCity } from "@/lib/cities";
-import { confirmationFields, type Language } from "@/lib/messages";
+import { confirmationFields, nextReminderDay, type Language } from "@/lib/messages";
 import { normalizePhone } from "@/lib/phone";
 import { reserveSignup, saveSubscriber } from "@/lib/subscribers";
 import { isTimeZone } from "@/lib/timezones";
@@ -42,6 +42,25 @@ export async function POST(request: Request) {
   if (!festivals && !fasting && !shraddha && !daily) {
     return Response.json({ error: "Choose at least one kind of note." }, { status: 400 });
   }
+  if (body.consent !== true) {
+    return Response.json({ error: "Confirm that these notes can come to your WhatsApp." }, { status: 400 });
+  }
+
+  const choices = [
+    festivals ? "festivals" : "",
+    fasting ? "fasts and ekadashi" : "",
+    shraddha ? "shraddha" : "",
+    daily ? "a daily panchang" : "",
+  ].filter(Boolean);
+  const next = nextReminderDay(new Date(), timezone, when, city.id, {
+    cityName: city.name,
+    cityNameGu: city.nameGu,
+    festivals,
+    fasting,
+    shraddha,
+    daily,
+    language,
+  });
 
   await saveSubscriber({
     name,
@@ -54,17 +73,24 @@ export async function POST(request: Request) {
     when,
     timezone,
     language,
+    consentAt: new Date().toISOString(),
   });
 
+  const saved = {
+    ok: true,
+    choices,
+    when,
+    next: next ? `${next.weekdayEn}, ${next.pretty}` : null,
+  };
+
   if (!twilioConfigured()) {
-    return Response.json({ ok: true, whatsapp: "saved" });
+    return Response.json({ ...saved, whatsapp: "saved" });
   }
 
   try {
     await sendWhatsApp(phone, confirmationFields(name, city.name, city.nameGu, language));
-    return Response.json({ ok: true, whatsapp: "sent" });
-  } catch (error) {
-    const warning = error instanceof Error ? error.message.slice(0, 180) : "WhatsApp could not be sent.";
-    return Response.json({ ok: true, whatsapp: "saved", warning });
+    return Response.json({ ...saved, whatsapp: "queued" });
+  } catch {
+    return Response.json({ ...saved, whatsapp: "saved" });
   }
 }

@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Besley, Literata, Noto_Serif_Gujarati } from "next/font/google";
+import Link from "next/link";
 import { Suspense } from "react";
 import { Header } from "@/components/Header";
 import { Toran } from "@/components/Toran";
+import { contactEmail, operatorName, whatsappDisplay, whatsappHref } from "@/lib/site";
 import "./globals.css";
 
 const display = Besley({
@@ -49,9 +51,20 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Toran />
         <main id="content">{children}</main>
         <footer className="site-footer">
-          <div className="wrap">
-            <p>The day follows sunrise in the Gujarat city you choose.</p>
-            <p>Patro is independent and is not affiliated with Drik Panchang.</p>
+          <div className="wrap footer-bar">
+            <div>
+              <p>
+                <strong>Patro</strong> is a personal Gujarati panchang run by {operatorName}.
+              </p>
+              <p>The day follows sunrise in the Gujarat city you choose. Patro is independent and is not affiliated with Drik Panchang.</p>
+            </div>
+            <nav aria-label="About and contact">
+              <Link href="/about">About</Link>
+              <Link href="/contact">Contact</Link>
+              <Link href="/privacy">Privacy</Link>
+              <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
+              <a href={whatsappHref}>{whatsappDisplay}</a>
+            </nav>
           </div>
         </footer>
       </body>
